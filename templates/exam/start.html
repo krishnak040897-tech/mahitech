@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}{{ exam.title }} — Exam — MahiTech{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="auth" style="max-width:520px">
+    <div class="auth-card">
+      <div class="form-head" style="text-align:left;margin-bottom:14px">
+        <span class="badge badge-green"><svg class="ic ic-xs"><use href="#i-check"></use></svg>Paper purchased</span>
+        <h1 style="margin-top:8px">{{ exam.title }}</h1>
+        {% if exam.description %}<p style="text-align:left">{{ exam.description }}</p>{% endif %}
+      </div>
+
+      <ul class="includes" style="margin:6px 0 14px">
+        <li><svg class="ic"><use href="#i-file"></use></svg>{{ q_count }} multiple-choice question{{ 's' if q_count != 1 else '' }}</li>
+        <li><svg class="ic"><use href="#i-bolt"></use></svg>Time limit: {{ exam.duration_minutes }} minutes (server-timed)</li>
+        <li><svg class="ic"><use href="#i-check-c"></use></svg>Pass mark: {{ exam.pass_percent }}%</li>
+        <li><svg class="ic"><use href="#i-infinity"></use></svg>Retakes allowed — your best score is kept</li>
+      </ul>
+
+      {% if attempts %}
+        <div class="list-title">Your previous attempts</div>
+        <div class="menu" style="margin-bottom:14px">
+          {% for a in attempts %}
+            <a class="row-item" href="{{ url_for('exam_result', attempt_id=a.id) }}">
+              <span class="mi {{ 't-green' if (100 * a.score / a.total) >= exam.pass_percent else 't-rose' }}">
+                <svg class="ic ic-s"><use href="#{{ 'i-check' if (100 * a.score / a.total) >= exam.pass_percent else 'i-alert' }}"></use></svg></span>
+              <span class="row-main"><b>{{ a.score }}/{{ a.total }}</b><small>{{ a.submitted_at[:16] if a.submitted_at }}</small></span>
+              <svg class="ic go"><use href="#i-chevron-r"></use></svg>
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if q_count %}
+        <form method="post" action="{{ url_for('exam_begin', exam_id=exam.id) }}">
+          <button class="btn btn-p btn-bl">
+            <svg class="ic ic-s"><use href="#i-bolt"></use></svg>Start exam</button>
+        </form>
+      {% else %}
+        <div class="demo-note">No questions have been added to this exam yet.</div>
+      {% endif %}
+
+      <p class="alt">
+        <a href="{{ url_for('my_exams') }}">← My Exams</a> ·
+        <a href="{{ url_for('exams_browse') }}">Exam papers</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

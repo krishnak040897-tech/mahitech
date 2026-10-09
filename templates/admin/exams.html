@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Exams — Admin — MahiTech{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page row">
+    <div>
+      <a class="backlink" href="{{ url_for('admin_profile') }}">
+        <svg class="ic ic-xs"><use href="#i-chevron-r"></use></svg>Admin profile
+      </a>
+      <h1>Exam papers</h1>
+      <p>{{ exams|length }} paper(s) — standalone, users buy each paper to take it</p>
+    </div>
+    <a class="btn btn-p" href="{{ url_for('admin_add_exam') }}">
+      <svg class="ic ic-s"><use href="#i-plus"></use></svg>Create exam</a>
+  </div>
+
+  {% if exams %}
+    <div class="tbl-wrap only-desktop">
+      <table class="rt">
+        <thead><tr><th>Title</th><th>Price</th><th>Questions</th><th>Time</th><th>Pass</th><th style="width:118px">Actions</th></tr></thead>
+        <tbody>
+          {% for e in exams %}
+            <tr>
+              <td><strong>{{ e.title }}</strong></td>
+              <td><strong>{{ 'Free' if e.price == 0 else '₹' ~ (e.price|inr) }}</strong></td>
+              <td><span class="badge">{{ e.q_count }}</span></td>
+              <td>{{ e.duration_minutes }} min</td>
+              <td>{{ e.pass_percent }}%</td>
+              <td>
+                <div style="display:inline-flex;gap:5px">
+                  <a class="btn btn-sec btn-ic" href="{{ url_for('admin_edit_exam', exam_id=e.id) }}" title="Edit & questions">
+                    <svg class="ic ic-s"><use href="#i-edit"></use></svg></a>
+                  <a class="btn btn-ghost btn-ic" href="{{ url_for('exam_start', exam_id=e.id) }}" title="Preview">
+                    <svg class="ic ic-s"><use href="#i-eye"></use></svg></a>
+                  <form method="post" action="{{ url_for('admin_delete_exam', exam_id=e.id) }}"
+                        data-confirm='Delete "{{ e.title }}"? Its questions and attempts will also be removed.'>
+                    <button class="btn btn-danger btn-ic" title="Delete">
+                      <svg class="ic ic-s"><use href="#i-trash"></use></svg></button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="only-mobile">
+      <div class="alist">
+        {% for e in exams %}
+          <details class="drow">
+            <summary class="drow-sum">
+              <span class="lrow-ic t-purple"><svg class="ic"><use href="#i-pen"></use></svg></span>
+              <span class="lrow-main">
+                <b>{{ e.title }}</b>
+                <small>{{ e.q_count }} Q{{ 's' if e.q_count != 1 else '' }} · {{ e.duration_minutes }} min · pass {{ e.pass_percent }}%</small>
+              </span>
+              <span class="lrow-end">
+                <span class="amt">{{ 'Free' if e.price == 0 else '₹' ~ (e.price|inr) }}</span>
+                <span class="badge">Paper</span>
+              </span>
+              <svg class="ic chev"><use href="#i-chevron-r"></use></svg>
+            </summary>
+            <div class="drow-body">
+              <div class="drow-acts">
+                <a class="btn btn-p" href="{{ url_for('admin_edit_exam', exam_id=e.id) }}">
+                  <svg class="ic ic-xs"><use href="#i-edit"></use></svg>Edit &amp; questions</a>
+                <a class="btn btn-sec" href="{{ url_for('exam_start', exam_id=e.id) }}">
+                  <svg class="ic ic-xs"><use href="#i-eye"></use></svg>Preview</a>
+                <form method="post" action="{{ url_for('admin_delete_exam', exam_id=e.id) }}"
+                      data-confirm='Delete "{{ e.title }}"? Its questions and attempts will also be removed.'>
+                  <button class="btn btn-danger"><svg class="ic ic-xs"><use href="#i-trash"></use></svg>Delete</button>
+                </form>
+              </div>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="empty">
+      <svg class="empty-art" viewBox="0 0 160 110"><use href="#v-empty"></use></svg>
+      <p>No exam papers yet — create your first paper.</p>
+      <a class="btn btn-p btn-sm" href="{{ url_for('admin_add_exam') }}">Create exam</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% from '_art.html' import card %}
+{% block title %}MahiTech — Exam Study Materials{% endblock %}
+
+{% set CAT_ICON = {'Government Exams':'i-landmark','Competitive Exams':'i-zap',
+                   'Entrance Exams':'i-pen','Academic Preparation':'i-book',
+                   'Career Preparation':'i-briefcase'} %}
+{% set CAT_TINT = {'Government Exams':'t-blue','Competitive Exams':'t-amber',
+                   'Entrance Exams':'t-purple','Academic Preparation':'t-green',
+                   'Career Preparation':'t-rose'} %}
+
+{% block content %}
+<div class="container">
+
+  <!-- HERO (minimal copy + business-man illustration on the page background) -->
+  <section class="hero-split">
+    <div class="hero-copy">
+      <span class="hero-chip"><svg class="ic"><use href="#i-sparkles"></use></svg>Study smarter with MahiTech</span>
+      <h1>Explore quality <em>study materials</em></h1>
+      <p class="hero-sub">Learning resources and more — all in one place.</p>
+      <div class="hero-cta">
+        <a class="btn btn-p" href="{{ url_for('browse') }}">
+          <svg class="ic ic-s"><use href="#i-bolt"></use></svg>Get Started</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <img class="hero-svg" loading="eager" decoding="async"
+           src="https://i.ibb.co/CKwrMn9J/business-man-holding-job-done-check-sign.png"
+           alt="Business professional holding a completed-tasks checklist" role="img"
+           aria-label="Study materials illustration">
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <div class="list-title">Explore categories</div>
+  <div class="cats">
+    {% for c in categories %}
+      <a class="cat" href="{{ url_for('browse', category=c) }}">
+        <span class="cat-ic {{ CAT_TINT[c] }}"><svg class="ic"><use href="#{{ CAT_ICON[c] }}"></use></svg></span>
+        {{ c }}
+        <svg class="ic cat-go"><use href="#i-chevron-r"></use></svg>
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- SEARCH -->
+  <form class="searchbar" method="get" action="{{ url_for('home') }}">
+    <div class="search-field">
+      <svg class="ic ic-s"><use href="#i-search"></use></svg>
+      <input class="inp" type="text" name="q" value="{{ q }}" autocomplete="off"
+             placeholder="Search — SSC, NEET, GATE, Class 12…  (press Enter)">
+      <button type="submit" hidden tabindex="-1" aria-hidden="true"></button>
+    </div>
+    {% if q %}<a class="btn btn-ghost" href="{{ url_for('home') }}">Clear</a>{% endif %}
+  </form>
+
+  <!-- MATERIALS -->
+  <div class="list-title">
+    <span>All materials</span>
+    <a href="{{ url_for('browse') }}">Browse all</a>
+  </div>
+
+  {% if products %}
+    <div class="grid">{% for p in products %}{{ card(p) }}{% endfor %}</div>
+  {% else %}
+    <div class="empty">
+      <svg class="empty-art" viewBox="0 0 160 110"><use href="#v-empty"></use></svg>
+      <p>No materials found{{ ' for your search' if q else ' yet' }}.</p>
+      {% if q %}<a class="btn btn-sec btn-sm" href="{{ url_for('home') }}">Clear search</a>{% endif %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

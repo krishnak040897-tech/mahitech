@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit exam' if exam else 'Create exam' }} — Admin{% endblock %}
+{% block content %}
+<style>
+.qitem{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.qitem .optline{font-size:12.5px;color:var(--text-2);margin-top:3px}
+.qitem .optline b{color:var(--text)}
+</style>
+<div class="container">
+<form class="form-page" method="post">
+  <input type="hidden" name="action" value="save_exam">
+  <div class="form-head">
+    <h1>{{ 'Edit exam paper' if exam else 'Create exam paper' }}</h1>
+    <p>{{ 'Pricing, timer and questions' if exam else 'Set the price, then add MCQs — users buy each paper' }}</p>
+  </div>
+
+  <div class="fgrid">
+    <div class="f full"><label>Exam Title</label>
+      <input class="inp" type="text" name="title" required value="{{ exam.title if exam else '' }}"
+             placeholder="e.g. SSC CGL Practice Test 1"></div>
+
+    <div class="f"><label>Price (₹) <span class="muted small" style="font-weight:400">(0 = free)</span></label>
+      <input class="inp" type="number" name="price" min="0" step="0.01" required
+             value="{{ exam.price if exam else 0 }}"></div>
+
+    <div class="f"><label>Duration (minutes)</label>
+      <input class="inp" type="number" name="duration_minutes" min="1" required
+             value="{{ exam.duration_minutes if exam else 15 }}"></div>
+
+    <div class="f"><label>Pass percentage (%)</label>
+      <input class="inp" type="number" name="pass_percent" min="0" max="100" required
+             value="{{ exam.pass_percent if exam else 40 }}"></div>
+
+    <div class="f full"><label>Description <span class="muted small" style="font-weight:400">(optional)</span></label>
+      <textarea class="inp" name="description" rows="2"
+                placeholder="What does this paper cover?">{{ exam.description if exam else '' }}</textarea></div>
+  </div>
+
+  <div class="form-acts">
+    <button class="btn btn-p"><svg class="ic ic-s"><use href="#i-check"></use></svg>
+      {{ 'Save exam' if exam else 'Create exam' }}</button>
+    <a class="btn btn-sec" href="{{ url_for('admin_exams') }}">Back to exams</a>
+  </div>
+</form>
+
+{% if exam %}
+  <div class="form-page" style="padding-top:6px">
+    <div class="list-title"><span>Questions ({{ questions|length }})</span></div>
+
+    {% for q in questions %}
+      <div class="qitem">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="width:24px;height:24px;border-radius:7px;background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:800;display:grid;place-items:center;flex:none">{{ loop.index }}</span>
+          <b style="font-size:13.5px;flex:1">{{ q.question }}</b>
+        </div>
+        <div class="optline"><b>A.</b> {{ q.opt_a }} · <b>B.</b> {{ q.opt_b }} · <b>C.</b> {{ q.opt_c }} · <b>D.</b> {{ q.opt_d }}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+          <span class="badge badge-green">Correct: {{ q.correct|upper }}</span>
+          <a class="btn btn-sec btn-sm" style="margin-left:auto"
+             href="{{ url_for('admin_edit_exam', exam_id=exam.id, qid=q.id) }}#qform">Edit</a>
+          <form method="post" action="{{ url_for('admin_delete_question', qid=q.id) }}"
+                data-confirm="Delete this question?">
+            <button class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="demo-note">No questions yet — add the first MCQ below.</div>
+    {% endfor %}
+
+    <!-- ADD / EDIT QUESTION -->
+    <div class="list-title" id="qform" style="margin-top:20px">
+      <span>{{ 'Edit question' if edit_q else 'Add question' }}</span>
+    </div>
+    <form method="post">
+      <input type="hidden" name="action" value="save_question">
+      {% if edit_q %}<input type="hidden" name="question_id" value="{{ edit_q.id }}">{% endif %}
+
+      <div class="f"><label>Question</label>
+        <textarea class="inp" name="question" rows="2" required
+                  placeholder="Type the question…">{{ edit_q.question if edit_q else '' }}</textarea></div>
+
+      <div class="fgrid">
+        <div class="f"><label>Option A</label>
+          <input class="inp" type="text" name="opt_a" required value="{{ edit_q.opt_a if edit_q else '' }}"></div>
+        <div class="f"><label>Option B</label>
+          <input class="inp" type="text" name="opt_b" required value="{{ edit_q.opt_b if edit_q else '' }}"></div>
+        <div class="f"><label>Option C</label>
+          <input class="inp" type="text" name="opt_c" required value="{{ edit_q.opt_c if edit_q else '' }}"></div>
+        <div class="f"><label>Option D</label>
+          <input class="inp" type="text" name="opt_d" required value="{{ edit_q.opt_d if edit_q else '' }}"></div>
+        <div class="f"><label>Correct option</label>
+          <select class="inp" name="correct" required>
+            {% for k in ['a','b','c','d'] %}
+              <option value="{{ k }}" {{ 'selected' if edit_q and edit_q.correct == k }}>{{ k|upper }}</option>
+            {% endfor %}
+          </select></div>
+      </div>
+
+      <div class="form-acts">
+        <button class="btn btn-p"><svg class="ic ic-s"><use href="#i-plus"></use></svg>
+          {{ 'Update question' if edit_q else 'Add question' }}</button>
+        {% if edit_q %}
+          <a class="btn btn-sec" href="{{ url_for('admin_edit_exam', exam_id=exam.id) }}">Cancel edit</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+{% endif %}
+</div>
+{% endblock %}
